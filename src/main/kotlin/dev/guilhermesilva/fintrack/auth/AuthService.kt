@@ -2,11 +2,10 @@ package dev.guilhermesilva.fintrack.application.auth
 
 import dev.guilhermesilva.fintrack.domain.user.User
 import dev.guilhermesilva.fintrack.domain.user.UserRepository
+import dev.guilhermesilva.fintrack.infra.exception.BusinessException
 import dev.guilhermesilva.fintrack.infra.security.JwtService
 import dev.guilhermesilva.fintrack.infra.security.UserPrincipal
-import org.springframework.http.HttpStatus
 import org.springframework.security.authentication.AuthenticationManager
-import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
@@ -21,14 +20,11 @@ class AuthService(
 ) {
 
     @Transactional
-    fun register(request: RegisterRequest): AuthResponse {
+    fun register(request: RegisterRequest): AuthResponse.Success {
         val email = request.email.normalizedEmail()
 
         if (userRepository.existsByEmail(email)) {
-            return AuthResponse.Error(
-                message = "Email already registered",
-                status = HttpStatus.CONFLICT
-            )
+            throw BusinessException.Conflict("Email already registered")
         }
 
         val user = User(
@@ -47,34 +43,20 @@ class AuthService(
         )
     }
 
-    fun login(request: LoginRequest): AuthResponse {
+    fun login(request: LoginRequest): AuthResponse.Success {
         val email = request.email.normalizedEmail()
 
-        return runCatching {
-            val authentication = authenticationManager.authenticate(
-                UsernamePasswordAuthenticationToken(email, request.password)
-            )
+        val authentication = authenticationManager.authenticate(
+            UsernamePasswordAuthenticationToken(email, request.password)
+        )
 
-            val principal = authentication.principal as UserPrincipal
-            val token = jwtService.generateToken(principal)
+        val principal = authentication.principal as UserPrincipal
+        val token = jwtService.generateToken(principal)
 
-            AuthResponse.Success(
-                token = token,
-                user = principal.user.toAuthUserResponse()
-            )
-        }.getOrElse { exception ->
-            when (exception) {
-                is BadCredentialsException -> AuthResponse.Error(
-                    message = "Invalid email or password",
-                    status = HttpStatus.UNAUTHORIZED
-                )
-
-                else -> AuthResponse.Error(
-                    message = "Authentication failed",
-                    status = HttpStatus.UNAUTHORIZED
-                )
-            }
-        }
+        return AuthResponse.Success(
+            token = token,
+            user = principal.user.toAuthUserResponse()
+        )
     }
 
     private fun String.normalizedEmail(): String =
@@ -82,7 +64,7 @@ class AuthService(
 
     private fun User.toAuthUserResponse(): AuthUserResponse =
         AuthUserResponse(
-            id = requireNotNull(id) { "User must have an id" },
+            id = requireNotNull(id),
             name = name,
             email = email
         )

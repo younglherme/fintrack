@@ -7,14 +7,12 @@ import dev.guilhermesilva.fintrack.domain.category.CategoryRepository
 import dev.guilhermesilva.fintrack.domain.transaction.Transaction
 import dev.guilhermesilva.fintrack.domain.transaction.TransactionRepository
 import dev.guilhermesilva.fintrack.domain.transaction.TransactionType
+import dev.guilhermesilva.fintrack.infra.exception.BusinessException
 import dev.guilhermesilva.fintrack.infra.security.UserPrincipal
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
-import org.springframework.data.jpa.domain.Specification
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.server.ResponseStatusException
 import java.time.LocalDate
 import java.util.UUID
 
@@ -135,10 +133,7 @@ class TransactionService(
         id: UUID
     ): Transaction =
         transactionRepository.findByIdAndUser(id, principal.user)
-            ?: throw ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "Transaction not found"
-            )
+            ?: throw BusinessException.NotFound("Transaction not found")
 
     private fun findCategoryOrThrow(
         principal: UserPrincipal,
@@ -148,10 +143,7 @@ class TransactionService(
         val category = categoryRepository.findByIdAndUserAndActiveTrue(
             id = categoryId,
             user = principal.user
-        ) ?: throw ResponseStatusException(
-            HttpStatus.NOT_FOUND,
-            "Category not found"
-        )
+        ) ?: throw BusinessException.NotFound("Category not found")
 
         validateCategoryType(category, type)
 
@@ -163,17 +155,13 @@ class TransactionService(
         transactionType: TransactionType
     ) {
         if (category.type != transactionType) {
-            throw ResponseStatusException(
-                HttpStatus.BAD_REQUEST,
-                "Category type must match transaction type"
-            )
+            throw BusinessException.BadRequest("Category type must match transaction type")
         }
     }
 
     private fun validateTransactionDate(transactionDate: LocalDate) {
         if (!transactionDate.isNotInFarFuture()) {
-            throw ResponseStatusException(
-                HttpStatus.BAD_REQUEST,
+            throw BusinessException.BadRequest(
                 "Transaction date cannot be more than 1 year in the future"
             )
         }
@@ -184,10 +172,7 @@ class TransactionService(
         endDate: LocalDate?
     ) {
         if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
-            throw ResponseStatusException(
-                HttpStatus.BAD_REQUEST,
-                "Start date cannot be after end date"
-            )
+            throw BusinessException.BadRequest("Start date cannot be after end date")
         }
     }
 }

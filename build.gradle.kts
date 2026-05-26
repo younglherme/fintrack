@@ -8,6 +8,7 @@ plugins {
 
     id("org.springframework.boot") version "3.5.14"
     id("io.spring.dependency-management") version "1.1.7"
+    jacoco
 }
 
 group = "dev.guilhermesilva"
@@ -47,11 +48,13 @@ dependencies {
     implementation("org.flywaydb:flyway-database-postgresql")
 
     testRuntimeOnly("com.h2database:h2")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
-
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:6.1.0")
+    testImplementation("org.mockito:mockito-junit-jupiter")
 }
 
 kotlin {
@@ -61,6 +64,37 @@ kotlin {
     }
 }
 
+jacoco {
+    toolVersion = "0.8.13"
+}
+
 tasks.withType<Test> {
     useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+        csv.required.set(false)
+    }
+}
+
+tasks.jacocoTestCoverageVerification {
+    dependsOn(tasks.jacocoTestReport)
+
+    violationRules {
+        rule {
+            limit {
+                minimum = "0.80".toBigDecimal()
+            }
+        }
+    }
+}
+
+tasks.check {
+    dependsOn(tasks.jacocoTestReport)
 }
