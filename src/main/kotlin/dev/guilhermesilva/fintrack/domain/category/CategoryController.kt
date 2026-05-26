@@ -1,18 +1,15 @@
 package dev.guilhermesilva.fintrack.application.category
 
 import dev.guilhermesilva.fintrack.infra.security.UserPrincipal
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.security.core.annotation.AuthenticationPrincipal
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.ResponseStatus
-import org.springframework.web.bind.annotation.RestController
-import java.util.UUID
+import org.springframework.web.bind.annotation.*
+import java.util.*
 
+@Tag(name = "Categorias", description = "Gerenciamento de categorias financeiras")
 @RestController
 @RequestMapping("/categories")
 class CategoryController(
@@ -21,6 +18,7 @@ class CategoryController(
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Registrar uma categoria")
     fun create(
         @AuthenticationPrincipal principal: UserPrincipal,
         @Valid @RequestBody request: CreateCategoryRequest
@@ -28,12 +26,14 @@ class CategoryController(
         categoryService.create(principal, request)
 
     @GetMapping
+    @Operation(summary = "Listar todas as categorias")
     fun findAll(
         @AuthenticationPrincipal principal: UserPrincipal
     ): List<CategoryResponse> =
         categoryService.findAll(principal)
 
     @GetMapping("/{id}")
+    @Operation(summary = "Listar todas as categorias por ID")
     fun findById(
         @AuthenticationPrincipal principal: UserPrincipal,
         @PathVariable id: UUID

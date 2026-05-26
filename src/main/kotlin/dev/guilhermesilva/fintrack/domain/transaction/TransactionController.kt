@@ -2,6 +2,8 @@ package dev.guilhermesilva.fintrack.application.transaction
 
 import dev.guilhermesilva.fintrack.domain.transaction.TransactionType
 import dev.guilhermesilva.fintrack.infra.security.UserPrincipal
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
 import java.util.UUID
 
+@Tag(name = "Transações", description = "Gerenciamento de receitas e despesas")
 @RestController
 @RequestMapping("/transactions")
 class TransactionController(
@@ -30,6 +33,7 @@ class TransactionController(
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Criar nova transação")
     fun create(
         @AuthenticationPrincipal principal: UserPrincipal,
         @Valid @RequestBody request: CreateTransactionRequest
@@ -37,6 +41,7 @@ class TransactionController(
         transactionService.create(principal, request)
 
     @GetMapping
+    @Operation(summary = "Localizar transações")
     fun findAll(
         @AuthenticationPrincipal principal: UserPrincipal,
 
@@ -54,7 +59,7 @@ class TransactionController(
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
         endDate: LocalDate?,
 
-        @PageableDefault(size = 10, sort = ["transactionDate"])
+        @PageableDefault(size = 10)
         pageable: Pageable
     ): Page<TransactionResponse> =
         transactionService.findAll(
@@ -67,6 +72,7 @@ class TransactionController(
         )
 
     @GetMapping("/{id}")
+    @Operation(summary = "Localizar transação por ID")
     fun findById(
         @AuthenticationPrincipal principal: UserPrincipal,
         @PathVariable id: UUID
@@ -74,6 +80,7 @@ class TransactionController(
         transactionService.findById(principal, id)
 
     @PutMapping("/{id}")
+    @Operation(summary = "Atualizar transação por ID")
     fun update(
         @AuthenticationPrincipal principal: UserPrincipal,
         @PathVariable id: UUID,
@@ -82,6 +89,7 @@ class TransactionController(
         transactionService.update(principal, id, request)
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Deletar transação por ID")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun delete(
         @AuthenticationPrincipal principal: UserPrincipal,

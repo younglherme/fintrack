@@ -6,7 +6,6 @@ import dev.guilhermesilva.fintrack.domain.user.User
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
-import jakarta.persistence.EntityListeners
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
 import jakarta.persistence.FetchType
@@ -18,9 +17,8 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint
-import org.springframework.data.annotation.CreatedDate
-import org.springframework.data.annotation.LastModifiedDate
-import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import org.hibernate.annotations.CreationTimestamp
+import org.hibernate.annotations.UpdateTimestamp
 import java.time.Instant
 import java.util.UUID
 
@@ -34,7 +32,6 @@ import java.util.UUID
         )
     ]
 )
-@EntityListeners(AuditingEntityListener::class)
 data class Category(
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -54,13 +51,13 @@ data class Category(
     @Column(nullable = false)
     val active: Boolean = true,
 
-    @CreatedDate
+    @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
-    val createdAt: Instant? = null,
+    var createdAt: Instant? = null,
 
-    @LastModifiedDate
+    @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
-    val updatedAt: Instant? = null
+    var updatedAt: Instant? = null
 ) {
     @OneToMany(mappedBy = "category", cascade = [CascadeType.ALL])
     val transactions: MutableList<Transaction> = mutableListOf()

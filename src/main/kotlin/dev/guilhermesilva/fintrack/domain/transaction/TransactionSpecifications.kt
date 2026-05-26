@@ -1,7 +1,10 @@
 package dev.guilhermesilva.fintrack.application.transaction
 
+import dev.guilhermesilva.fintrack.domain.category.Category
 import dev.guilhermesilva.fintrack.domain.transaction.Transaction
 import dev.guilhermesilva.fintrack.domain.transaction.TransactionType
+import dev.guilhermesilva.fintrack.domain.user.User
+import jakarta.persistence.criteria.JoinType
 import org.springframework.data.jpa.domain.Specification
 import java.time.LocalDate
 import java.util.UUID
@@ -10,7 +13,8 @@ object TransactionSpecifications {
 
     fun byUserId(userId: UUID): Specification<Transaction> =
         Specification { root, _, criteriaBuilder ->
-            criteriaBuilder.equal(root.get<Any>("user").get<UUID>("id"), userId)
+            val userJoin = root.join<Transaction, User>("user", JoinType.INNER)
+            criteriaBuilder.equal(userJoin.get<UUID>("id"), userId)
         }
 
     fun byType(type: TransactionType?): Specification<Transaction> =
@@ -23,21 +27,28 @@ object TransactionSpecifications {
     fun byCategoryId(categoryId: UUID?): Specification<Transaction> =
         Specification { root, _, criteriaBuilder ->
             categoryId?.let {
-                criteriaBuilder.equal(root.get<Any>("category").get<UUID>("id"), it)
+                val categoryJoin = root.join<Transaction, Category>("category", JoinType.INNER)
+                criteriaBuilder.equal(categoryJoin.get<UUID>("id"), it)
             } ?: criteriaBuilder.conjunction()
         }
 
     fun byStartDate(startDate: LocalDate?): Specification<Transaction> =
         Specification { root, _, criteriaBuilder ->
             startDate?.let {
-                criteriaBuilder.greaterThanOrEqualTo(root.get("transactionDate"), it)
+                criteriaBuilder.greaterThanOrEqualTo(
+                    root.get("transactionDate"),
+                    it
+                )
             } ?: criteriaBuilder.conjunction()
         }
 
     fun byEndDate(endDate: LocalDate?): Specification<Transaction> =
         Specification { root, _, criteriaBuilder ->
             endDate?.let {
-                criteriaBuilder.lessThanOrEqualTo(root.get("transactionDate"), it)
+                criteriaBuilder.lessThanOrEqualTo(
+                    root.get("transactionDate"),
+                    it
+                )
             } ?: criteriaBuilder.conjunction()
         }
 }

@@ -1,5 +1,6 @@
 package dev.guilhermesilva.fintrack.infra.security
 
+import jakarta.servlet.http.HttpServletResponse
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -30,12 +31,32 @@ class SecurityConfig(
             .sessionManagement {
                 it.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             }
+            .exceptionHandling {
+                it.authenticationEntryPoint { _, response, _ ->
+                    response.sendError(
+                        HttpServletResponse.SC_UNAUTHORIZED,
+                        "Unauthorized"
+                    )
+                }
+
+                it.accessDeniedHandler { _, response, _ ->
+                    response.sendError(
+                        HttpServletResponse.SC_FORBIDDEN,
+                        "Forbidden"
+                    )
+                }
+            }
             .authorizeHttpRequests {
                 it
                     .requestMatchers(
                         "/auth/register",
                         "/auth/login",
-                        "/actuator/health"
+                        "/actuator/health",
+                        "/error",
+                        "/swagger-ui.html",
+                        "/swagger-ui/**",
+                        "/v3/api-docs",
+                        "/v3/api-docs/**"
                     ).permitAll()
                     .anyRequest().authenticated()
             }
