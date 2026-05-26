@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: fintrack-api
+
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
+server:
+  port: ${SERVER_PORT:8080}
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:ZmZpbm5UcmFja0FwaVNlY3JldEtleUZvckp3dEF1dGhTdHJvbmdFbm91Z2gyMDI2}
+    expiration-in-ms: ${JWT_EXPIRATION_IN_MS:86400000}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+  endpoint:
+    health:
+      show-details: always
