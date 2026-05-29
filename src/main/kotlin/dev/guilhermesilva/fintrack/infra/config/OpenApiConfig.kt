@@ -21,17 +21,21 @@ class OpenApiConfig {
             .info(
                 Info()
                     .title("FinTrack API")
-                    .description("REST API para gerenciamento de finanças pessoais.")
+                    .description(
+                        """
+                        API REST para gerenciamento de finanças pessoais."""
+                            .trimIndent()
+                    )
                     .version("1.0.0")
                     .contact(
                         Contact()
                             .name("Guilherme Silva")
-                            .email("gluizdasilvadev@gmail.com")
-                            .url("github.com/younglherme")
+                            .email("gluizdasilvadev@gmai.com")
+                            .url("https://github.com/younglherme")
                     )
                     .license(
                         License()
-                            .name("")
+                            .name("MIT")
                     )
             )
             .addSecurityItem(

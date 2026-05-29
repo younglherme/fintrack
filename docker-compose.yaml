@@ -4,20 +4,49 @@ services:
     container_name: fintrack-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: fintrack
-      POSTGRES_USER: fintrack_user
-      POSTGRES_PASSWORD: fintrack_password
+      POSTGRES_DB: ${DB_NAME:-fintrack}
+      POSTGRES_USER: ${DB_USERNAME:-fintrack_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-fintrack_password}
     ports:
-      - "5433:5432"
+      - "${DB_PORT:-5433}:5432"
     volumes:
       - fintrack_postgres_data:/var/lib/postgresql/data
     networks:
       - fintrack-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U fintrack_user -d fintrack"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-fintrack_user} -d ${DB_NAME:-fintrack}"]
       interval: 10s
       timeout: 5s
       retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fintrack-api
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SERVER_PORT: 8080
+
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-fintrack}
+      DB_USERNAME: ${DB_USERNAME:-fintrack_user}
+      DB_PASSWORD: ${DB_PASSWORD:-fintrack_password}
+
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION_IN_MS: ${JWT_EXPIRATION_IN_MS:-86400000}
+
+      SPRINGDOC_SWAGGER_UI_ENABLED: ${SPRINGDOC_SWAGGER_UI_ENABLED:-true}
+      SPRINGDOC_API_DOCS_ENABLED: ${SPRINGDOC_API_DOCS_ENABLED:-true}
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - fintrack-network
 
 volumes:
   fintrack_postgres_data:

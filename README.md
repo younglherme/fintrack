@@ -1,217 +1,72 @@
-# FinTrack API 💰
-
-FinTrack é uma API REST para gerenciamento de finanças pessoais. Desenvolvida com **Spring Boot**, **Kotlin** e **PostgreSQL**, oferece funcionalidades completas para controlar suas despesas e receitas.
-
-## 📋 Características
-
-- ✅ **Autenticação e Autorização** com JWT
-- ✅ **Gerenciamento de Usuários** com criptografia de senha
-- ✅ **Gerenciamento de Categorias** de transações
-- ✅ **Gerenciamento de Transações** (receitas e despesas)
-- ✅ **Validação de Dados** robusta
-- ✅ **Cobertura de Testes** com JaCoCo (80%+)
-- ✅ **Documentação API** com Swagger/OpenAPI
-- ✅ **Health Checks** e Actuator endpoints
-- ✅ **Migrations** automáticas com Flyway
-- ✅ **Docker Support** com docker-compose
-
-## 🛠️ Stack Tecnológico
-
-| Tecnologia | Versão |
-|-----------|--------|
-| **Java** | 17 |
-| **Kotlin** | 2.2.21 |
-| **Spring Boot** | 3.5.14 |
-| **PostgreSQL** | 16 |
-| **JWT (JJWT)** | 0.13.0 |
-| **JUnit 5** | Latest |
-| **Mockito** | 6.1.0 |
-
-## 🚀 Como Iniciar
-
-### Pré-requisitos
-
-- Java 17+
-- PostgreSQL 16 (ou Docker)
-- Gradle 8.x
-
-### Instalação Local
-
-1. **Clone o repositório**
-   ```bash
-   git clone <seu-repositorio>
-   cd fintrack
-   ```
-
-2. **Inicie o PostgreSQL com Docker** (opcional)
-   ```bash
-   docker-compose up -d
-   ```
-
-3. **Configure as variáveis de ambiente** (opcional)
-   ```bash
-   export SPRING_PROFILES_ACTIVE=dev
-   export JWT_SECRET=sua-chave-secreta
-   export JWT_EXPIRATION_IN_MS=86400000
-   ```
-
-4. **Execute a aplicação**
-   ```bash
-   ./gradlew bootRun
-   ```
-
-   Ou no Windows:
-   ```bash
-   gradlew.bat bootRun
-   ```
-
-A API estará disponível em `http://localhost:8080`
-
-## 🔐 Autenticação
-
-A API utiliza **JWT (JSON Web Tokens)** para autenticação. Após fazer login ou registrar-se, você receberá um token que deve ser incluído nas requisições subsequentes no header:
-
-```
-Authorization: Bearer <seu-token-jwt>
-```
-
-### Endpoints de Autenticação
-
-- `POST /auth/register` - Registrar novo usuário
-- `POST /auth/login` - Fazer login
-
-## 📚 Endpoints Principais
-
-### Usuários
-- `GET /users/{id}` - Obter dados do usuário
-- `PUT /users/{id}` - Atualizar usuário
-
-### Categorias
-- `GET /categories` - Listar todas as categorias
-- `POST /categories` - Criar nova categoria
-- `PUT /categories/{id}` - Atualizar categoria
-- `DELETE /categories/{id}` - Deletar categoria
-
-### Transações
-- `GET /transactions` - Listar transações
-- `POST /transactions` - Criar transação
-- `PUT /transactions/{id}` - Atualizar transação
-- `DELETE /transactions/{id}` - Deletar transação
-
-## 🧪 Testes
-
-### Executar todos os testes
-```bash
-./gradlew test
-```
-
-### Gerar relatório de cobertura de testes
-```bash
-./gradlew jacocoTestReport
-```
-
-O relatório HTML estará disponível em `build/reports/jacoco/test/html/index.html`
-
-### Verificar cobertura mínima (80%)
-```bash
-./gradlew jacocoTestCoverageVerification
-```
-
-## 📖 Documentação API
-
-Swagger UI disponível em: `http://localhost:8080/swagger-ui.html`
-
-JSON da API: `http://localhost:8080/v3/api-docs`
-
-## 🏗️ Arquitetura
-
-O projeto segue uma arquitetura em camadas:
-
-```
-src/main/kotlin/dev/guilhermesilva/fintrack/
-├── application/      # Serviços e DTOs (lógica de negócio)
-├── auth/            # Autenticação e autorização
-├── domain/          # Entidades e repositórios (domínio)
-├── infra/           # Infraestrutura (segurança, exceções, etc)
-└── FintrackApplication.kt  # Classe principal
-```
-
-## 📝 Variáveis de Ambiente
-
-| Variável | Padrão | Descrição |
-|----------|--------|-----------|
-| `SPRING_PROFILES_ACTIVE` | `dev` | Perfil ativo (dev, prod, test) |
-| `SERVER_PORT` | `8080` | Porta do servidor |
-| `JWT_SECRET` | - | Chave secreta para JWT (deve ser alterada em produção) |
-| `JWT_EXPIRATION_IN_MS` | `86400000` | Tempo de expiração do JWT em ms (1 dia) |
-| `SPRING_DATASOURCE_URL` | - | URL do banco de dados PostgreSQL |
-| `SPRING_DATASOURCE_USERNAME` | - | Usuário do banco de dados |
-| `SPRING_DATASOURCE_PASSWORD` | - | Senha do banco de dados |
-
-## 🐳 Docker
-
-### Iniciar com Docker Compose
-
-```bash
-docker-compose up -d
-```
-
-Isso iniciará um container PostgreSQL com as configurações corretas.
-
-### Parar os containers
-
-```bash
-docker-compose down
-```
-
-## 🔍 Health Check
-
-A aplicação expõe um endpoint de health check:
-
-```
-GET /actuator/health
-```
-
-Resposta esperada:
-```json
-{
-  "status": "UP"
-}
-```
-
-## 📦 Build para Produção
-
-Gerar arquivo JAR:
-```bash
-./gradlew build
-```
-
-O arquivo JAR estará em: `build/libs/fintrack-api-0.0.1-SNAPSHOT.jar`
-
-Executar:
-```bash
-java -jar build/libs/fintrack-api-0.0.1-SNAPSHOT.jar
-```
-
-## 🐛 Troubleshooting
-
-### Erro de conexão com PostgreSQL
-Verifique se o PostgreSQL está rodando e acessível. Use Docker Compose se não tiver PostgreSQL instalado:
-```bash
-docker-compose up -d postgres
-```
-
-### Erro de porta em uso
-Se a porta 8080 estiver em uso, altere via variável de ambiente:
-```bash
-export SERVER_PORT=9090
-```
-
-### Token JWT inválido
-Certifique-se que está enviando o token corretamente no header:
-```
-Authorization: Bearer <token>
-```
+# FinTrack API
 
 
-**Desenvolvido por Guilherme Silva**
+![Java](https://img.shields.io/badge/Java-17-orange)
+![Kotlin](https://img.shields.io/badge/Kotlin-2.2-blueviolet)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5-brightgreen)
+![Coverage](https://img.shields.io/badge/Coverage-80%25%2B-success)
+
+API REST para gerenciamento de finanças pessoais, desenvolvida em Kotlin com Spring Boot.
+
+## Sobre o projeto
+
+O FinTrack API permite que usuários gerenciem receitas e despesas pessoais com autenticação JWT, categorias financeiras e filtros por período, tipo e categoria.
+
+Este projeto foi desenvolvido como portfólio backend, com foco em boas práticas de mercado, testes automatizados, Docker, CI/CD e documentação OpenAPI.
+
+## Funcionalidades
+
+- Cadastro de usuário
+- Login com JWT
+- Autenticação stateless
+- CRUD de categorias
+- CRUD de transações
+- Filtros por:
+    - Tipo: `INCOME` ou `EXPENSE`
+    - Categoria
+    - Período
+- Paginação
+- Validações com Bean Validation
+- Tratamento global de erros
+- Swagger/OpenAPI
+- Testes automatizados
+- Cobertura mínima com JaCoCo
+- Docker e Docker Compose
+- GitHub Actions CI
+
+## Tecnologias
+
+- Kotlin
+- Java 17
+- Spring Boot 3
+- Spring Security
+- JWT com JJWT
+- Spring Data JPA
+- PostgreSQL
+- Flyway
+- Docker
+- Docker Compose
+- JUnit 5
+- Mockito-Kotlin
+- MockMvc
+- JaCoCo
+- Swagger/OpenAPI 3
+- GitHub Actions
+
+## Arquitetura de pacotes
+
+```text
+src/main/kotlin/dev/guilhermesilva/fintrack
+├── application
+│   ├── auth
+│   ├── category
+│   ├── common
+│   └── transaction
+├── domain
+│   ├── category
+│   ├── transaction
+│   └── user
+└── infra
+    ├── config
+    ├── exception
+    └── security
