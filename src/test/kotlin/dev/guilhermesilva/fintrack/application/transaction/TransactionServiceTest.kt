@@ -224,4 +224,153 @@ class TransactionServiceTest {
             )
         }
     }
+    @Test
+    fun `should update transaction successfully`() {
+        val transactionId = UUID.randomUUID()
+        val categoryId = UUID.randomUUID()
+
+        val category = Category(
+            id = categoryId,
+            name = "Alimentação",
+            type = TransactionType.EXPENSE,
+            user = user
+        )
+
+        val currentTransaction = Transaction(
+            id = transactionId,
+            amount = BigDecimal("59.90"),
+            description = "Mercado",
+            type = TransactionType.EXPENSE,
+            transactionDate = LocalDate.of(2026, 5, 26),
+            category = category,
+            user = user
+        )
+
+        val request = UpdateTransactionRequest(
+            amount = BigDecimal("75.50"),
+            description = "Mercado atualizado",
+            type = TransactionType.EXPENSE,
+            transactionDate = LocalDate.of(2026, 5, 27),
+            categoryId = categoryId
+        )
+
+        val updatedTransaction = currentTransaction.copy(
+            amount = BigDecimal("75.50"),
+            description = "Mercado atualizado",
+            transactionDate = LocalDate.of(2026, 5, 27)
+        )
+
+        whenever(transactionRepository.findByIdAndUser(transactionId, user))
+            .thenReturn(currentTransaction)
+
+        whenever(
+            categoryRepository.findByIdAndUserAndActiveTrue(
+                id = categoryId,
+                user = user
+            )
+        ).thenReturn(category)
+
+        whenever(transactionRepository.save(any()))
+            .thenReturn(updatedTransaction)
+
+        val response = transactionService.update(principal, transactionId, request)
+
+        assertEquals(transactionId, response.id)
+        assertEquals(BigDecimal("75.50"), response.amount)
+        assertEquals("Mercado atualizado", response.description)
+        assertEquals(LocalDate.of(2026, 5, 27), response.transactionDate)
+    }
+    @Test
+    fun `should throw not found when updating non existing transaction`() {
+        val transactionId = UUID.randomUUID()
+
+        val request = UpdateTransactionRequest(
+            amount = BigDecimal("75.50"),
+            description = "Mercado atualizado"
+        )
+
+        whenever(transactionRepository.findByIdAndUser(transactionId, user))
+            .thenReturn(null)
+
+        assertThrows(BusinessException.NotFound::class.java) {
+            transactionService.update(principal, transactionId, request)
+        }
+    }
+    @Test
+    fun `should throw bad request when updating transaction with incompatible category type`() {
+        val transactionId = UUID.randomUUID()
+
+        val expenseCategory = Category(
+            id = UUID.randomUUID(),
+            name = "Alimentação",
+            type = TransactionType.EXPENSE,
+            user = user
+        )
+
+        val incomeCategory = Category(
+            id = UUID.randomUUID(),
+            name = "Salário",
+            type = TransactionType.INCOME,
+            user = user
+        )
+
+        val currentTransaction = Transaction(
+            id = transactionId,
+            amount = BigDecimal("59.90"),
+            description = "Mercado",
+            type = TransactionType.EXPENSE,
+            transactionDate = LocalDate.now(),
+            category = expenseCategory,
+            user = user
+        )
+
+        val request = UpdateTransactionRequest(
+            type = TransactionType.EXPENSE,
+            categoryId = incomeCategory.id
+        )
+
+        whenever(transactionRepository.findByIdAndUser(transactionId, user))
+            .thenReturn(currentTransaction)
+
+        whenever(
+            categoryRepository.findByIdAndUserAndActiveTrue(
+                id = requireNotNull(incomeCategory.id),
+                user = user
+            )
+        ).thenReturn(incomeCategory)
+
+        assertThrows(BusinessException.BadRequest::class.java) {
+            transactionService.update(principal, transactionId, request)
+        }
+    }
+    @Test
+    fun `should throw bad request when transaction date is more than one year in future`() {
+        val categoryId = UUID.randomUUID()
+
+        val category = Category(
+            id = categoryId,
+            name = "Alimentação",
+            type = TransactionType.EXPENSE,
+            user = user
+        )
+
+        val request = CreateTransactionRequest(
+            amount = BigDecimal("59.90"),
+            description = "Mercado",
+            type = TransactionType.EXPENSE,
+            transactionDate = LocalDate.now().plusYears(2),
+            categoryId = categoryId
+        )
+
+        whenever(
+            categoryRepository.findByIdAndUserAndActiveTrue(
+                id = categoryId,
+                user = user
+            )
+        ).thenReturn(category)
+
+        assertThrows(BusinessException.BadRequest::class.java) {
+            transactionService.create(principal, request)
+        }
+    }
 }
