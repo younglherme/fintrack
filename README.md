@@ -87,8 +87,8 @@ Para rodar o projeto localmente, você precisa ter instalado:
 Clone o repositório:
 
 ```bash
-git clone https://github.com/SEU_USUARIO/NOME_DO_REPOSITORIO.git
-cd NOME_DO_REPOSITORIO
+git clone https://github.com/younglherme
+cd fintrack
 ```
 
 Suba o PostgreSQL com Docker:
