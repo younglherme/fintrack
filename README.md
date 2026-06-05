@@ -38,22 +38,23 @@ Este projeto foi desenvolvido como portfólio backend, com foco em boas prática
 
 ## Tecnologias
 
-* Kotlin
-* Java 17
-* Spring Boot 3
-* Spring Security
-* JWT com JJWT
-* Spring Data JPA
-* PostgreSQL
-* Flyway
-* Docker
-* Docker Compose
-* JUnit 5
-* Mockito-Kotlin
-* MockMvc
-* JaCoCo
-* Swagger/OpenAPI 3
-* GitHub Actions
+| Tecnologia       | Versão |
+| ---------------- | ------ |
+| Kotlin           | 2.2    |
+| Java             | 17     |
+| Spring Boot      | 3.5    |
+| Spring Security  | —      |
+| JJWT             | 0.12.6 |
+| Spring Data JPA  | —      |
+| PostgreSQL       | 16     |
+| Flyway           | —      |
+| JUnit 5          | —      |
+| Mockito-Kotlin   | —      |
+| MockMvc          | —      |
+| JaCoCo           | —      |
+| Swagger/OpenAPI  | 3.0    |
+| Docker           | —      |
+| GitHub Actions   | —      |
 
 ## Arquitetura de pacotes
 
@@ -87,7 +88,7 @@ Para rodar o projeto localmente, você precisa ter instalado:
 Clone o repositório:
 
 ```bash
-git clone https://github.com/younglherme
+git clone https://github.com/younglherme/fintrack.git
 cd fintrack
 ```
 
